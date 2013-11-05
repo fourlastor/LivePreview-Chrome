@@ -10,3 +10,104 @@ chrome.tabs.onUpdated.addListener(
             chrome.pageAction.show(tabId);
         }
     });
+
+LivePreview = {
+
+    serverURL: function() {
+        var serverProtocol = 'ws';
+        var serverHost = '127.0.0.1';
+        var serverPort = 9091;
+        var serverFile = '/';
+        return serverProtocol+'://'+serverHost+':'+serverPort+serverFile;
+    },
+
+    cleanup: function() {
+        this.socket = null;
+        this.socketReady = false;
+    },
+
+    connect: function() {
+        if (this.socket === null) {
+            var self = this;
+
+            this.socket = new WebSocket(this.serverURL());
+
+            this.socket.onerror = function(e) {
+                console.log('Socket error');
+                console.log(e);
+                self.cleanup();
+            }
+
+            this.socket.onclose = function() {
+                self.cleanup();
+            }
+
+            this.socket.onopen = function() {
+                self.socketReady = true;
+            }
+
+            this.socket.onmessage = function(e) {
+                var message;
+
+                try {
+                    message = JSON.parse(e.data);
+                } catch(err) {
+                    console.log('Message not in JSON format!')
+                    console.log(err);
+                    console.log(e.data);
+                    return;
+                }
+
+                self.processMessage(message);
+            }
+        }
+    },
+
+    processMessage: function(message) {
+        var command = message.command;
+        if(command === 'reload') {
+            this.reloadTab();
+        } else {
+            console.log('Command not supported!');
+        }
+    },
+
+    startDebug: function() {
+        this.isDebugging = true;
+        this.connect();
+    },
+
+    stopDebug: function() {
+        if(this.socket !== null) {
+            this.socket.close();
+            this.cleanup();
+        }
+        this.isDebugging = false;
+    },
+
+    updateIcon: function(tabId) {
+        if(this.isDebugging) {
+            chrome.pageAction.setIcon({tabId: tabId, path: 'icons/icon19-on.png'});
+        } else {
+            chrome.pageAction.setIcon({tabId: tabId, path: 'icons/icon19.png'});
+        }
+    },
+
+    toggleDebug: function(tabId) {
+        if(this.isDebugging) {
+            this.stopDebug();
+        }
+        else {
+            this.startDebug();
+        }
+        this.updateIcon(tabId);
+    }
+
+};
+
+LivePreview.cleanup();
+
+chrome.pageAction.onClicked.addListener(
+    function(tab) {
+        LivePreview.toggleDebug(tab.id)
+    });
