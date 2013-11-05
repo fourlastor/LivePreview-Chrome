@@ -2,7 +2,7 @@
   "name": "Sublime LivePreview",
   "version": "0.0.1",
   "manifest_version": 2,
-  "description": "Extension to auto refresh pages edited in sublimetext",
+  "description": "Extension to auto refresh pages edited in Sublime Text",
   "homepage_url": "http://extensionizr.com",
   "icons": {
     "16": "icons/icon16.png",
@@ -12,7 +12,7 @@
   "default_locale": "en",
   "background": {
     "scripts": [
-      "src/bg/background.js"
+      "src/bg/background.js"
     ],
     "persistent": true
   },
