@@ -1,8 +1,8 @@
 {
-  "name": "CHANGE THIS : Extension boilerplate",
+  "name": "Sublime LivePreview",
   "version": "0.0.1",
   "manifest_version": 2,
-  "description": "This extension was created with the awesome extensionizr.io",
+  "description": "Extension to auto refresh pages edited in sublimetext",
   "homepage_url": "http://extensionizr.com",
   "icons": {
     "16": "icons/icon16.png",
