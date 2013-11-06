@@ -25,8 +25,9 @@ LivePreview = {
             this.tabs[tabId] = {
                 isDebugging: false
             };
-            chrome.pageAction.show(tabId);
         }
+        chrome.pageAction.show(tabId);
+        this.updateIcon(tabId);
     },
 
     toggleDebug: function(tabId) {
@@ -100,7 +101,7 @@ LivePreview = {
     },
 
     reloadTab: function(tabId) {
-        chrome.tabs.reload(tabId, {bypassCache: true});
+        chrome.tabs.reload(parseInt(tabId), {bypassCache: true});
     },
 
     reloadAllTabs: function() {
