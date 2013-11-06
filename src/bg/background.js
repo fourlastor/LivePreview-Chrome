@@ -99,10 +99,22 @@ LivePreview = {
         }
     },
 
+    reloadTab: function(tabId) {
+        chrome.tabs.reload(tabId, {bypassCache: true});
+    },
+
+    reloadAllTabs: function() {
+        for (var tabId in this.tabs) {
+            if(this.tabs[tabId].isDebugging) {
+                this.reloadTab(tabId);
+            }
+        }
+    },
+
     processMessage: function(message) {
         var command = message.command;
         if(command === 'reload') {
-            this.reloadTab();
+            this.reloadAllTabs();
         } else {
             console.log('Command not supported!');
         }
