@@ -4,14 +4,13 @@
 //     "sample_setting": "This is how you use Store.js to remember values"
 // });
 
-chrome.tabs.onUpdated.addListener(
-    function(tabId, changeInfo, tab) {
-        if (tab.url.indexOf('http://localhost') > -1) {
-            chrome.pageAction.show(tabId);
-        }
-    });
 
 LivePreview = {
+
+    tabs: new Object(),
+
+    socket: null,
+    socketReady: false,
 
     serverURL: function() {
         var serverProtocol = 'ws';
@@ -19,6 +18,43 @@ LivePreview = {
         var serverPort = 9091;
         var serverFile = '/';
         return serverProtocol+'://'+serverHost+':'+serverPort+serverFile;
+    },
+
+    attachTab: function(tabId) {
+        if(this.tabs[tabId] === undefined) {
+            this.tabs[tabId] = {
+                isDebugging: false
+            };
+            chrome.pageAction.show(tabId);
+        }
+    },
+
+    toggleDebug: function(tabId) {
+
+        if(this.tabs[tabId].isDebugging) {
+            this.stopDebug(tabId);
+        } else {
+            this.startDebug(tabId);
+        }
+
+        this.updateIcon(tabId);
+    },
+
+    startDebug: function(tabId) {
+        this.connect();
+        this.tabs[tabId].isDebugging = true;
+    },
+
+    stopDebug: function(tabId) {
+        this.tabs[tabId].isDebugging = false;
+    },
+
+    updateIcon: function(tabId) {
+        if(this.tabs[tabId].isDebugging) {
+            chrome.pageAction.setIcon({tabId: tabId, path: 'icons/icon19-on.png'});
+        } else {
+            chrome.pageAction.setIcon({tabId: tabId, path: 'icons/icon19.png'});
+        }
     },
 
     cleanup: function() {
@@ -70,42 +106,18 @@ LivePreview = {
         } else {
             console.log('Command not supported!');
         }
-    },
-
-    startDebug: function() {
-        this.isDebugging = true;
-        this.connect();
-    },
-
-    stopDebug: function() {
-        if(this.socket !== null) {
-            this.socket.close();
-            this.cleanup();
-        }
-        this.isDebugging = false;
-    },
-
-    updateIcon: function(tabId) {
-        if(this.isDebugging) {
-            chrome.pageAction.setIcon({tabId: tabId, path: 'icons/icon19-on.png'});
-        } else {
-            chrome.pageAction.setIcon({tabId: tabId, path: 'icons/icon19.png'});
-        }
-    },
-
-    toggleDebug: function(tabId) {
-        if(this.isDebugging) {
-            this.stopDebug();
-        }
-        else {
-            this.startDebug();
-        }
-        this.updateIcon(tabId);
     }
 
 };
 
 LivePreview.cleanup();
+
+chrome.tabs.onUpdated.addListener(
+    function(tabId, changeInfo, tab) {
+        if (tab.url.indexOf('http://localhost') > -1) {
+           LivePreview.attachTab(tabId);
+        }
+    });
 
 chrome.pageAction.onClicked.addListener(
     function(tab) {
